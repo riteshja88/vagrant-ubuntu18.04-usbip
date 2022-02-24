@@ -1,13 +1,13 @@
 # vagrant-ubuntu18.04-usbip
 
+## Run below command
 ```
-#Run below command
 vagrant up
 vagrant ssh
 vagrant destroy
 ```
-TODO - Make below work
+
+On client
 ```
-modprobe usbip_core
-modprobe usbip_host
+sshpass -p vagrant ssh vagrant@192.168.1.91 sudo ./restart.sh ;sudo rmmod vhci-hcd;sudo modprobe vhci-hcd; sudo usbip attach -r 192.168.1.91 -b 2-1
 ```

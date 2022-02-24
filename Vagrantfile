@@ -69,6 +69,36 @@ Vagrant.configure("2") do |config|
   # Ansible, Chef, Docker, Puppet and Salt are also available. Please see the
   # documentation for more information about their specific syntax and use.
   config.vm.provision "shell", inline: <<-SHELL
-     apt-get update -y && apt-get install -y linux-tools-4.15.0-167-generic && hostname usbip-server
+     hostname usbip-server
+
+     sed -i '/PasswordAuthentication /d' /etc/ssh/sshd_config
+     echo "PasswordAuthentication yes" >> /etc/ssh/sshd_config
+     sed -i '/ChallengeResponseAuthentication /d' /etc/ssh/sshd_config
+     echo "ChallengeResponseAuthentication no" >> /etc/ssh/sshd_config
+     sudo systemctl restart sshd
+
+     #echo 'vagrant' | openssl passwd -1 -stdin # $1$/QumeMpi$7DNrmqSaoOwOLF4QsDuw41
+     echo 'vagrant:$1$/QumeMpi$7DNrmqSaoOwOLF4QsDuw41' | chpasswd -e
+
+     apt -y install linux-tools-4.15.0-167-generic
+     echo "deb-src http://archive.ubuntu.com/ubuntu bionic main" >> /etc/apt/sources.list
+     echo "deb-src http://archive.ubuntu.com/ubuntu bionic-updates main"  >> /etc/apt/sources.list
+     apt -y update
+     apt -y build-dep linux linux-image-$(uname -r)
+     apt -y source linux-image-unsigned-$(uname -r)
+     cd linux-`uname -r|awk -F'-' '{print $1}'` #cd linux-4.15.0
+     cd drivers/usb/usbip
+     make -C /usr/src/linux-headers-`uname -r` M=`pwd` modules
+     make -C /usr/src/linux-headers-`uname -r` M=`pwd` modules_install
+     cd ../../../../
+     depmod -a
+     update-initramfs -u
+     echo "modprobe usbip_core; modprobe usbip_host; usbipd -D;usbip bind -b 2-1" >> start.sh
+     chmod a+x start.sh
+     echo "pkill -9 usbipd; rmmod usbip_host usbip_core" >> cleanup.sh
+     chmod a+x cleanup.sh
+     echo "./cleanup.sh;./start.sh" >> restart.sh
+     chmod a+x restart.sh
+     ./start.sh
    SHELL
 end
