@@ -54,9 +54,9 @@ Vagrant.configure("2") do |config|
     #vb.gui = false
     #
     #   # Customize the amount of memory on the VM:
-    vb.memory = "1024"
+    vb.memory = "256"
     vb.cpus = "1"
-    vb.customize ["modifyvm", :id, "--cpuexecutioncap", "50"]
+    vb.customize ["modifyvm", :id, "--cpuexecutioncap", "25"]
     vb.customize ["modifyvm", :id, "--usb", "on"]
     vb.customize ["modifyvm", :id, "--usbehci", "on"]
     vb.customize ['usbfilter', 'add', '0', '--target', :id, '--name', 'ESP32', '--vendorid', '0x10c4', '--productid', '0xea60']
